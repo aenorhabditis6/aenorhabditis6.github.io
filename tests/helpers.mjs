@@ -119,7 +119,67 @@ export const LIVE = 'div.sr-only[aria-live="polite"]';
  * that means "settled" rather than "probably long enough by now".
  */
 export async function ringReady(page) {
-  await expect(page.locator(LIVE)).not.toHaveText("", { timeout: 90_000 });
+  try {
+    await expect(page.locator(LIVE)).not.toHaveText("", { timeout: 90_000 });
+  } catch (err) {
+    // "The entry never arrived" has several very different causes and a bare
+    // timeout tells them apart for nobody: no WebGL at all, an atlas that
+    // never finished, or a frame rate low enough that the timeline stalls.
+    // The last one is why this exists — see the lag smoothing note in
+    // Carousel.jsx — and the one number that identifies it is the frame rate.
+    const state = JSON.stringify(await ringDiagnostics(page), null, 2);
+    throw new Error(`${err.message}\n\nring state on timeout:\n${state}`);
+  }
+}
+
+/**
+ * What the page looks like when the ring failed to arrive.
+ *
+ * The frame-rate window is ended by `setTimeout`, never by rAF: the whole
+ * question is whether rAF is being starved, and a rAF-driven timer cannot
+ * measure its own starvation — it just hangs, which is how this went wrong
+ * the first time it was written.
+ */
+export async function ringDiagnostics(page) {
+  return page.evaluate(
+    () =>
+      new Promise((resolve) => {
+        let frames = 0;
+        const t0 = performance.now();
+        const step = () => {
+          frames++;
+          requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+
+        setTimeout(() => {
+          const canvas = document.querySelector("canvas");
+          let renderer = "no context";
+          try {
+            const gl = document.createElement("canvas").getContext("webgl2");
+            const info = gl?.getExtension("WEBGL_debug_renderer_info");
+            if (info) renderer = gl.getParameter(info.UNMASKED_RENDERER_WEBGL);
+            else if (gl) renderer = "context, but no debug info";
+          } catch (e) {
+            renderer = String(e);
+          }
+          resolve({
+            fps: Number(
+              (frames / ((performance.now() - t0) / 1000)).toFixed(2),
+            ),
+            canvas: canvas ? [canvas.width, canvas.height] : null,
+            // 100 here with an empty live region means the art and the seed
+            // both finished and it is the entry timeline that is stuck.
+            loader:
+              [...document.querySelectorAll('div[aria-hidden="true"]')].find(
+                (d) => /^\d{3}$/.test(d.textContent || ""),
+              )?.textContent ?? null,
+            renderer,
+            hidden: document.hidden,
+          });
+        }, 5000);
+      }),
+  );
 }
 
 /** What the page currently says is in front, read the way a reader would. */

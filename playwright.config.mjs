@@ -19,10 +19,11 @@ export default defineConfig({
 
   use: {
     baseURL: `http://127.0.0.1:${PORT}`,
-    // Every px figure in ring/params.js is quoted at this width, and the band
-    // logic steps at 1024 and again at 640 — so this is the one viewport where
-    // the layout is exactly as authored.
-    viewport: { width: 1512, height: 900 },
+    // Above the 1024 band step, so the full layout is on screen, but no wider
+    // than it needs to be: the ring is one full-screen fragment shader and
+    // these runners rasterise it on the CPU, so every pixel is paid for twice
+    // — once in the shader and again in how long the entry takes to finish.
+    viewport: { width: 1280, height: 800 },
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
     launchOptions: {

@@ -160,6 +160,17 @@ passed.
 
 ## Non-obvious things that will bite you
 
+**GSAP's lag smoothing is off, and has to stay off.** By default GSAP treats
+any frame longer than 500ms as if it were 33ms, so a backgrounded tab cannot
+resume mid-animation with one huge jump. The entry is a fixed eight-second
+timeline, and on a machine with no GPU — one full-screen fragment shader,
+rasterised on the CPU — frames run into whole seconds. With smoothing on, the
+timeline then advances 33ms per frame: measured at 0.32 fps the counter reaches
+100 and the ring never arrives at all, not after four minutes. The `ring.spec`
+tests all wait on the entry, so this is the first thing that breaks if someone
+"restores the default", and `ringReady` prints the frame rate on timeout for
+exactly that reason.
+
 **`uScale` is a packed vec4.** `xy` is the birth scale, `z` is brightness (for
 the side-card dim), `w` is which atlas cell the plane wears. They ride together
 because GLSL ES allocates a full vec4 row per uniform-array element whatever

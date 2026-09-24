@@ -39,6 +39,20 @@ const blankTexture = () => {
   return t;
 };
 
+// GSAP smooths any frame longer than half a second by pretending it was 33ms,
+// so a backgrounded tab cannot resume mid-animation with one huge jump. That
+// is the wrong trade here. The entry is a fixed eight-second sequence, and on
+// a machine drawing this in software — no GPU, one full-screen fragment shader
+// — frames run into whole seconds. The timeline then advances 33ms per frame,
+// eight seconds becomes twenty minutes, and the viewer watches a counter that
+// reached 100 long ago. Measured at 0.32 fps the ring never arrives at all.
+//
+// Off, the intro takes the time it says on any machine and merely looks choppy
+// on a slow one, and a tab returning from the background finds the ring
+// already formed. The spin physics clamp their own dt inside the loop, so
+// there is nothing left here to jump.
+gsap.ticker.lagSmoothing(0);
+
 export default function Carousel() {
   const containerRef = useRef(null);
   const listRef = useRef(null);
