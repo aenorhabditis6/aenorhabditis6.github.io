@@ -1,23 +1,21 @@
-# ICE WORKS
+# Tina Shen — Works
 
-> 一件以“冰的凝结、融化与流动”为视觉隐喻的实验性交互网页作品。
+> 六项物理与应用数学工作，每项三张卡片。图纹全部由代码在加载时按各自的数学画出。
 
+<https://aenorhabditis6.github.io/>
+
+[![CI](https://github.com/aenorhabditis6/aenorhabditis6.github.io/actions/workflows/ci.yml/badge.svg)](https://github.com/aenorhabditis6/aenorhabditis6.github.io/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/代码许可-MIT-black.svg)](LICENSE)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![Three.js](https://img.shields.io/badge/Three.js-r185-black)
-![Desktop](https://img.shields.io/badge/体验-Desktop-black)
 
-ICE WORKS 将后数字极简主义、编辑式排版和生成艺术结合在一个全屏作品轮播中。页面以近白背景、黑色无衬线字体和大面积留白建立冷静秩序，再通过 WebGL 图像、ASCII 粒子、液态连接和玻璃折射打破这份秩序。
+![当前站点：Scan Route 一卡在前，左侧是所属项目的说明，右侧目录展开 ASTRA 的三张](docs/carousel.png)
 
-它既是一个作品集界面，也是一项关于数字图像如何在“颗粒—凝结—成像—融化—流动”之间转换的视觉实验。
-
-![环形作品轮播界面](docs/carousel.png)
+轮播本身来自 [ICE WORKS](https://github.com/MegD1/Ice-works-showcase)，一件以“冰的凝结、融化与流动”为视觉隐喻的交互作品：整个圆环是**一个全屏片元着色器**画的有向距离场，相邻卡片因此能互相融化、在分开时拉出蜜丝。那部分机制本分支一行未改，下面大半篇文档也是上游的。
 
 ---
 
 > **本分支的改动（Tina Shen）**
->
-> 线上：<https://aenorhabditis6.github.io/>
 >
 > 轮播机制、着色器、交互和入场动画全部沿用上游，一行未改。换掉的是卡片里的**图纹**：
 > 十八张卡片由 [`components/ring/plates.js`](components/ring/plates.js) 在加载时用
