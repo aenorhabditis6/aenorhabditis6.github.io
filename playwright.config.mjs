@@ -5,8 +5,10 @@ const PORT = 4173;
 export default defineConfig({
   testDir: "tests",
   // The entry is about eight seconds of animation before the ring answers to
-  // anything, and most of these wait for it.
-  timeout: 150_000,
+  // anything, and most of these wait for it — then every flick after that has
+  // to settle. On a runner with no GPU those are tens of seconds each, so this
+  // is sized for the slowest machine it has to pass on, not for this one.
+  timeout: 240_000,
   expect: { timeout: 20_000 },
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

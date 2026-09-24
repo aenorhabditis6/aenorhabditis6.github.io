@@ -48,11 +48,15 @@ test.describe("the ring", () => {
     await ringReady(page);
     const start = await frontCard(page);
 
-    // Three plates to a work, so leaving the one it started in takes at most
-    // three landings — six is slack, not hope.
+    // Backwards, which crosses a work boundary in one landing rather than
+    // three: the entry parks on the first card of the first work, so forwards
+    // is two more plates of the same work before anything changes. On a
+    // runner drawing this in software each landing is tens of seconds, and
+    // three of them is the difference between passing and running out of
+    // budget. The loop is slack for a flick that lands short.
     let crossed = null;
-    for (let i = 0; i < 6 && !crossed; i++) {
-      await turnUntilChange(page);
+    for (let i = 0; i < 4 && !crossed; i++) {
+      await turnUntilChange(page, -1000);
       const now = await frontCard(page);
       if (now.work && now.work !== start.work) crossed = now;
     }
