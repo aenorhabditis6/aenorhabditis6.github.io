@@ -1,9 +1,40 @@
 @import "tailwindcss";
 
-/* The @font-face blocks live in app/layout.js, not here: a url() in a
-   stylesheet is not rewritten for basePath and the published site lives under
-   one. Family names are looked up by name in ring/params.js and listed again
-   in the textFont dropdown in ring/gui.js. */
+/* Family names here have to match the strings in ring/params.js — nameFont,
+   idxFont and textFont are looked up by name, not imported — and the textFont
+   dropdown in ring/gui.js lists them a third time.
+
+   The URLs are absolute because this is a user site and is served from the
+   root of its domain. If it ever moves under a path, these are the first
+   thing to break and the least obvious: a url() inside a stylesheet is not
+   rewritten for Next's basePath. The arrow in ring/tag.js is the other one. */
+
+/* Project names and disciplines. Two real cuts, so nameWeight 400 and 500
+   both resolve to a drawn weight rather than a synthesised one. */
+@font-face {
+  font-family: "Satoshi";
+  src: url("/Satoshi-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/Satoshi-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Numbers, years and the load counter. */
+@font-face {
+  font-family: "Geist";
+  src: url("/Geist-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
 html,
 body {

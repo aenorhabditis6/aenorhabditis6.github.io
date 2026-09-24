@@ -20,21 +20,24 @@ positioned DOM labels over the top of it.
 
 ```bash
 npm run dev      # localhost:3000
-npm run build    # also the fastest correctness check
+npm run build    # static export into out/
 npm run lint     # eslint
+npm run test     # playwright, against the built export
 npx prettier --check "components/**/*.{js,jsx}" "app/**/*.{js,jsx}"
 ```
 
-There are **no tests**. `npm run build` plus `npm run lint` is the whole safety
-net. GLSL is compiled at runtime, not at build time, so a shader typo builds
-fine and fails in the browser console — check shader edits by loading the page.
+`npm run test` is the safety net that `npm run build` cannot be. GLSL is
+compiled at runtime, not at build time, so a shader typo builds clean and
+fails in the browser console; a plate painter that throws leaves its cell
+blank and nothing else notices. The tests run the real page in Chromium and
+assert on pixels — see **Tests** below.
 
 ## Layout
 
 ```
 app/
   page.js              renders <Carousel />, nothing else
-  layout.js            root layout, metadata, @font-face (see Conventions)
+  layout.js            root layout + metadata
   globals.css          Tailwind v4 import, @font-face, page background
 
 components/
@@ -44,7 +47,6 @@ components/
     projects.js        six works of three plates each, in ring order
     plates.js          the card art, painted in Canvas 2D at load
     note.js            the per-work context under the left lockup
-    asset.js           prefixes anything served out of public/
     params.js          every tunable, as a factory
     utils.js           TAU/DEG, easings, signedOffset, chase
     atlas.js           paints every plate into one texture
@@ -115,6 +117,46 @@ If you tune on a machine that isn't 1512 wide, set `refWidth` to your window
 first — the **fit** folder has a button that reads it off the live one.
 Otherwise you are tuning against a scale factor that isn't 1 and everything
 will be wrong everywhere else.
+
+## Tests
+
+`tests/plates.spec.js` renders all eighteen painters into canvases and
+measures them. Per plate: mean luminance inside a band, and **spatial**
+contrast across an 8x6 grid of block means — not per-pixel variance, because
+the grain and the vignette give an empty cell plenty of that. Then every pair
+is compared, so dealing two rows the same painter cannot pass. The thresholds
+have roughly 2-3x headroom against the real values and were checked by
+breaking a plate on purpose: deleting the walk from `brownian` (the bug that
+actually shipped once) fails with `brownian spatial contrast: 5.1 > 6`.
+
+`ring.spec.js` drives the built export in Chromium. It waits on the live
+region rather than on a clock — that text is written on the first frame after
+the entry lands, so it means *settled* rather than *probably long enough*.
+Then: the page is measurably drawn on (a shader that failed to compile leaves
+a page that is entirely background and nothing else notices), all three faces
+resolved, the lockup and the column and the note agree with each other, the
+ring crosses a work boundary and all three follow, and the two bands shed what
+they are supposed to shed.
+
+Two things about it that are not obvious:
+
+- **`ring/plates.js` is injected as a module, not imported.** It imports
+  nothing and touches nothing but `document`, so the test reads the file and
+  appends one line to hand the export to the page. That keeps the file under
+  test the file that ships — no test-only route, no hook on `window` in
+  production code.
+- **A flick has to arrive as one wheel event.** Wheel input adds to a velocity
+  the damping bleeds off between frames, and the ring snaps back to its slot
+  once that falls under `snapFrom`. Notches sent one `await` at a time are a
+  frame apart, each two-thirds spent before the next lands, and the sum never
+  clears the threshold — the ring twitches and settles exactly where it
+  started, which reads as "the wheel handler is broken".
+
+`npm run test` builds the export first (the Playwright `webServer` does it) and
+serves it with `scripts/serve-out.mjs`, a dependency-free static server, so the
+tests run against the files that get published rather than against `next dev`.
+CI publishes that same `out/` directory, so what is deployed is the build that
+passed.
 
 ## Non-obvious things that will bite you
 
@@ -247,14 +289,15 @@ Source is MIT. The contents of `public/` are explicitly _not_ covered — see
 
 Font families are looked up **by name**: the strings in `params.js`
 (`nameFont`, `idxFont`, `textFont`) have to match a `@font-face` family in
-`app/layout.js`, and the `textFont` dropdown in `gui.js` lists them a third
+`app/globals.css`, and the `textFont` dropdown in `gui.js` lists them a third
 time. A name with no matching block falls back to system sans silently, which
 looks like a rendering bug rather than a missing file.
 
-The faces are declared in `layout.js` rather than `globals.css` because a
-`url()` inside a stylesheet is **not** rewritten for `basePath`, and the
-published site lives under one (`/<repo>/works`). Anything else reaching into
-`public/` goes through `ring/asset.js` for the same reason.
+Those `url()`s and the arrow in `ring/tag.js` are absolute, which is correct
+for a user site served from the root of its domain and wrong the moment it
+moves under a path: Next rewrites its own URLs for `basePath` but not a
+`url()` inside a stylesheet. It fails only on the deployed path, so the
+visual test is what would catch it.
 
 ## Dead files — safe to delete
 

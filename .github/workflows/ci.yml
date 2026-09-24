@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A deploy that starts while the last one is still going would publish the
+# older of the two. Queue instead of cancelling: a half-finished deploy is
+# worse than a slow one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run lint
+
+      - name: Install the test browser
+        run: npx playwright install --with-deps chromium
+
+      # This builds the export (the Playwright webServer runs `npm run build`)
+      # and then drives it in a real browser. Both halves matter here: GLSL is
+      # compiled at runtime, so a shader typo builds clean and fails only on
+      # screen, and a plate painter that draws almost nothing is a perfectly
+      # valid program.
+      - run: npm run test
+
+      - name: Keep the report when something failed
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+      # The directory the tests just ran against, so what gets published is
+      # the build that passed rather than a second one nobody looked at.
+      - uses: actions/upload-pages-artifact@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          path: out
+
+  deploy:
+    needs: check
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
