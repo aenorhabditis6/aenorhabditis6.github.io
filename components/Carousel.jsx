@@ -172,7 +172,7 @@ export default function Carousel() {
       uTag: { value: new THREE.Vector4() },
       uTagP: { value: new THREE.Vector4() },
       uTagQ: { value: new THREE.Vector4() },
-      uPage: { value: new THREE.Color("#fafafa") },
+      uPage: { value: new THREE.Color("#fafafa").convertLinearToSRGB() },
     };
 
     const mesh = new THREE.Mesh(
@@ -645,13 +645,40 @@ export default function Carousel() {
     let particleAmount = 0;
     let particleFlow = 0;
 
+    // This shader writes authored sRGB straight through, so the glass and
+    // CSS backdrop must share those same channel values, not linear RGB.
+    const backgrounds = WORKS.map((work) =>
+      new THREE.Color(work.background).convertLinearToSRGB(),
+    );
+    let backgroundWork = -1;
+    const paintBackground = () => {
+      const { r, g, b } = uniforms.uPage.value;
+      container.style.backgroundColor = `rgb(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)})`;
+    };
+    const setBackground = (work) => {
+      if (work === backgroundWork || !backgrounds[work]) return;
+      backgroundWork = work;
+      container.dataset.work = WORKS[work].id;
+      const target = backgrounds[work];
+      gsap.to(uniforms.uPage.value, {
+        r: target.r,
+        g: target.g,
+        b: target.b,
+        duration: reducedMotion.matches ? 0 : params.backgroundTime,
+        ease: "power2.out",
+        overwrite: true,
+        onUpdate: paintBackground,
+      });
+    };
+    paintBackground();
+
     const paintList = () => {
       const items = itemsRef.current;
       for (let i = 0; i < items.length; i++) {
         const el = items[i];
         if (!el) continue;
         const on = i === shown;
-        el.style.opacity = on ? "1" : "0.2";
+        el.style.opacity = on ? "1" : "0.5";
         if (on) el.setAttribute("aria-current", "true");
         else el.removeAttribute("aria-current");
       }
@@ -663,11 +690,12 @@ export default function Carousel() {
       // only one showing its plates. Nothing opens below narrowAt — the type
       // is bumped 1.5x down there and six names is already the whole column.
       const work = WORK_OF[shown];
+      setBackground(work);
       const groups = groupsRef.current;
       const lists = plateListsRef.current;
       for (let w = 0; w < groups.length; w++) {
         const on = w === work;
-        if (groups[w]) groups[w].style.opacity = on ? "1" : "0.28";
+        if (groups[w]) groups[w].style.opacity = on ? "1" : "0.55";
         const ul = lists[w];
         if (!ul) continue;
         const open = on && !narrowNow;
@@ -1481,6 +1509,7 @@ export default function Carousel() {
       container.removeEventListener("click", onClick);
 
       tl?.kill();
+      gsap.killTweensOf(uniforms.uPage.value);
       gsap.killTweensOf(splitText.chars);
       gsap.killTweensOf(splitText.fades);
       gsap.killTweensOf(listEl);
@@ -1538,7 +1567,7 @@ export default function Carousel() {
               // Tracked and set in the number's face rather than uppercased:
               // these are real names and "VfOx" is not "VFOX".
               style={{
-                opacity: 0.28,
+                opacity: 0.55,
                 fontFamily: '"Geist", ui-sans-serif, system-ui, sans-serif',
                 fontSize: "0.88em",
                 letterSpacing: "0.05em",
@@ -1565,7 +1594,7 @@ export default function Carousel() {
                     }}
                     // No transition, deliberately: the colour turns over the
                     // moment the ring passes the halfway point between slots.
-                    style={{ opacity: 0.2 }}
+                    style={{ opacity: 0.5 }}
                   >
                     {plate.name}
                   </li>

@@ -31,6 +31,7 @@ export const WEIGHTS = { Light: 300, Regular: 400, Medium: 500, Semibold: 600 };
  */
 export function defaultParams() {
   return {
+    backgroundTime: 0.35,
     // -- fit ------------------------------------------------------------
     // 14" MacBook Pro at default scaling: 3024x1964 native, 1512x982 points.
     refWidth: 1512,

@@ -47,6 +47,9 @@ test.describe("the ring", () => {
     await page.goto("/");
     await ringReady(page);
     const start = await frontCard(page);
+    const backdrop = page.locator("[data-work]");
+    await expect(backdrop).toHaveAttribute("data-work", "venus");
+    await expect(backdrop).toHaveCSS("background-color", "rgb(231, 176, 110)");
 
     // Backwards, which crosses a work boundary in one landing rather than
     // three: the entry parks on the first card of the first work, so forwards
@@ -69,6 +72,15 @@ test.describe("the ring", () => {
     expect(crossed.note).toContain(crossed.work);
     // Exactly one work is open, and it is holding its three plates.
     expect(crossed.openRows).toEqual([3]);
+    const colors = {
+      "NASA VfOx": "rgb(231, 176, 110)",
+      "Stanford RSL": "rgb(117, 198, 200)",
+      "Johns Hopkins": "rgb(176, 150, 217)",
+      "Beller Group": "rgb(156, 189, 114)",
+      "Backside of the Moon": "rgb(128, 157, 188)",
+      ASTRA: "rgb(215, 154, 137)",
+    };
+    await expect(backdrop).toHaveCSS("background-color", colors[crossed.work]);
   });
 
   test("sheds the note, then the column, as it narrows", async ({ page }) => {

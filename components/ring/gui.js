@@ -24,6 +24,8 @@ export function mountGui(GUI, { params, state, info, actions }) {
   gui.add(state, "shift", 0, 1, 0.001).listen();
   gui.add({ replay }, "replay");
 
+  gui.add(params, "backgroundTime", 0, 1, 0.05).name("background fade (s)");
+
   // -- fit -----------------------------------------------------------------
   // Every px param in the folders below is quoted at the reference window.
   // Tuning at some other size and leaving it alone is what makes the ring look

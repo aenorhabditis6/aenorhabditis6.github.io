@@ -19,6 +19,7 @@ import { PLATES } from "./plates";
 export const WORKS = [
   {
     id: "venus",
+    background: "#e7b06e",
     type: "Planetary",
     year: "2024",
     label: "NASA VfOx",
@@ -33,6 +34,7 @@ export const WORKS = [
   },
   {
     id: "tomography",
+    background: "#75c6c8",
     type: "Tomography",
     year: "2025",
     label: "Stanford RSL",
@@ -53,6 +55,7 @@ export const WORKS = [
   },
   {
     id: "generative",
+    background: "#b096d9",
     type: "Generative",
     year: "2025",
     label: "Johns Hopkins",
@@ -67,6 +70,7 @@ export const WORKS = [
   },
   {
     id: "soft-matter",
+    background: "#9cbd72",
     type: "Soft Matter",
     year: "2024",
     label: "Beller Group",
@@ -83,6 +87,7 @@ export const WORKS = [
   },
   {
     id: "moon",
+    background: "#809dbc",
     type: "Game Physics",
     year: "2024",
     label: "Backside of the Moon",
@@ -99,6 +104,7 @@ export const WORKS = [
   },
   {
     id: "astra",
+    background: "#d79a89",
     type: "Spatial Capture",
     year: "2026",
     label: "ASTRA",

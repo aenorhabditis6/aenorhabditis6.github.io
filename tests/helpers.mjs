@@ -71,7 +71,7 @@ export function plateStats(page, w = 240, h = 160) {
 }
 
 /**
- * How much of a screenshot is drawn on. The page is #fafafa, so anything
+ * How much of a screenshot is drawn on. The page has a per-work color, so anything
  * meaningfully darker is the ring — which makes this the one assertion that
  * catches a shader that failed to compile. GLSL is compiled at runtime, so
  * that failure builds clean and shows up only as a blank page.
@@ -87,9 +87,15 @@ export async function inkFraction(page, png) {
     const ctx = canvas.getContext("2d");
     ctx.drawImage(img, 0, 0);
     const d = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    const backdrop = document.querySelector("[data-work]");
+    const rgb = getComputedStyle(backdrop)
+      .backgroundColor.match(/[\d.]+/g)
+      .slice(0, 3)
+      .map(Number);
+    const threshold = (rgb[0] + rgb[1] + rgb[2]) / 3 - 40;
     let ink = 0;
     for (let i = 0; i < d.length; i += 4) {
-      if ((d[i] + d[i + 1] + d[i + 2]) / 3 < 210) ink++;
+      if ((d[i] + d[i + 1] + d[i + 2]) / 3 < threshold) ink++;
     }
     return ink / (d.length / 4);
   }, png.toString("base64"));
