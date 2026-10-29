@@ -1,0 +1,177 @@
+/* The tap card. Same paper, ink and faces as the ring (see DESIGN.md), set
+   for one hand on a phone: one column, big targets, nothing that needs a GPU. */
+
+/* globals.css pins html and body to the viewport for the ring. With both at
+   overflow-x: hidden, body becomes its own scroll box and a long page is cut
+   off at one screen (and on iOS scrolls inside the page instead of the page).
+   This one scrolls like a document. */
+html:has(.hi),
+body:has(.hi) {
+  height: auto;
+}
+body:has(.hi) {
+  overflow-x: visible;
+}
+
+.hi {
+  --ink: #0a0a0a;
+  --paper: #fafafa;
+  --soft: #0a0a0a9e;
+  --rule: #0a0a0a1f;
+  min-height: 100svh;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Satoshi", ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0.01em;
+  display: flex;
+  justify-content: center;
+  padding: max(28px, env(safe-area-inset-top))
+    max(20px, env(safe-area-inset-right)) max(40px, env(safe-area-inset-bottom))
+    max(20px, env(safe-area-inset-left));
+}
+.hi-card {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.hi-head {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.hi-event {
+  align-self: flex-start;
+  margin: 0 0 6px;
+  font-family: "Geist", ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  letter-spacing: -0.01em;
+  border: 1px solid var(--ink);
+  border-radius: 20px;
+  padding: 6px 14px;
+}
+.hi-name {
+  margin: 0;
+  font-size: 34px;
+  line-height: 1.05;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.hi-lede {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--soft);
+  max-width: 34em;
+}
+.hi-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.hi-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 50px;
+  padding: 0 16px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  color: inherit;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 500;
+}
+.hi-btn-primary {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+.hi-btn-note {
+  font-family: "Geist", ui-sans-serif, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  opacity: 0.6;
+}
+.hi-arrow {
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+.hi-email {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 4px 0 16px;
+  font-family: "Geist", ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+}
+.hi-email a {
+  color: inherit;
+  user-select: all;
+  overflow-wrap: anywhere;
+}
+.hi-email button {
+  font: inherit;
+  font-size: 13px;
+  color: inherit;
+  background: none;
+  border: 1px solid var(--rule);
+  border-radius: 20px;
+  padding: 5px 12px;
+  cursor: pointer;
+}
+.hi-label {
+  margin: 0 0 4px;
+  font-family: "Geist", ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--soft);
+}
+.hi-work ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.hi-work li {
+  display: grid;
+  grid-template-columns: 3.2em 1fr;
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 1px solid var(--rule);
+}
+.hi-work li > div {
+  min-width: 0;
+}
+.hi-year {
+  font-family: "Geist", ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  color: var(--soft);
+  font-variant-numeric: tabular-nums;
+  padding-top: 2px;
+}
+.hi-work-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  font-size: 16px;
+  color: inherit;
+  text-decoration: none;
+}
+.hi-work p {
+  margin: 4px 0 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--soft);
+}
+.hi a:focus-visible,
+.hi button:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}

@@ -24,6 +24,7 @@ const TYPES = {
   ".woff2": "font/woff2",
   ".png": "image/png",
   ".ico": "image/x-icon",
+  ".vcf": "text/vcard; charset=utf-8",
 };
 
 const send = (res, code, body) => {
